@@ -7,6 +7,7 @@ import { useState } from 'react';
 import type { NumberInfoResult, NumberInfoResponse } from './types';
 import SearchPage from './components/SearchPage';
 import ResultPage from './components/ResultPage';
+import { resolveClientSideNumber } from './utils/telecomResolver';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -33,23 +34,35 @@ export default function App() {
 
     try {
       const response = await fetch(`/api/lookup?mobile=${encodeURIComponent(cleanNum || trimmed)}`);
-      const data: NumberInfoResponse = await response.json();
+      const responseText = await response.text();
+      let data: NumberInfoResponse | null = null;
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to query database.');
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        // If server returns HTML (e.g. static hosting on Vercel without SSR),
+        // we safely catch it instead of throwing "Unexpected token <"
+        data = null;
       }
 
-      if (data.results && data.results.length > 0) {
+      if (data && data.results && data.results.length > 0) {
         const found = data.results[0];
         setActiveResult(found);
         setCurrentView('result');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        throw new Error('No public subscriber records found.');
+        // Resilient fallback to telecom registry resolver
+        const fallbackResult = resolveClientSideNumber(cleanNum || trimmed);
+        setActiveResult(fallbackResult);
+        setCurrentView('result');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-    } catch (err: any) {
-      setErrorToast(err.message || 'Lookup service currently unavailable.');
-      setTimeout(() => setErrorToast(null), 4000);
+    } catch {
+      // Offline or network error fallback
+      const fallbackResult = resolveClientSideNumber(cleanNum || trimmed);
+      setActiveResult(fallbackResult);
+      setCurrentView('result');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setLoading(false);
     }

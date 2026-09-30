@@ -1,6 +1,7 @@
 export interface NumberInfoResult {
   mobile: string;
   rawWith880?: string;
+  formattedInternational?: string;
   name: string;
   isPrivate?: boolean;
   fname?: string;
