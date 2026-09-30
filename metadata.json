@@ -1,0 +1,6 @@
+{
+  "name": "Indian Number Lookup",
+  "description": "Look up caller details and Truecaller information for Bangladeshi mobile numbers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
