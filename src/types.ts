@@ -4,6 +4,7 @@ export interface NumberInfoResult {
   formattedInternational?: string;
   name: string;
   isPrivate?: boolean;
+  gender?: string;
   fname?: string;
   location?: string;
   carrier?: string;

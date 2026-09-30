@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import Header from './Header';
 import type { NumberInfoResult } from '../types';
+import { detectGenderFromName } from '../utils/genderHelper';
 
 interface ResultPageProps {
   result: NumberInfoResult;
@@ -41,6 +42,9 @@ export default function ResultPage({ result, onBackToSearch }: ResultPageProps) 
   const isPrivate = result.isPrivate ?? displayName.includes('Private');
   const operatorName = result.carrier?.replace(/\(BD\)/g, '').trim() || 'Banglalink';
 
+  // Detect gender based on name
+  const genderInfo = detectGenderFromName(displayName, displayRawNum);
+
   // Operator badge border color (Screenshot had gold/amber for Banglalink)
   const getOperatorStyle = (op: string) => {
     if (op.includes('Banglalink')) {
@@ -68,7 +72,7 @@ export default function ResultPage({ result, onBackToSearch }: ResultPageProps) 
   };
 
   const handleCopyDetails = () => {
-    const summary = `Name: ${displayName}\nNumber: ${displayRawNum}\nOperator: ${operatorName}\nStatus: বায়োমেট্রিক সিম রেকর্ড (Biometric SIM)`;
+    const summary = `Name: ${displayName}\nNumber: ${displayRawNum}\nOperator: ${operatorName}\nGender: ${genderInfo.label}\nStatus: বায়োমেট্রিক সিম রেকর্ড (Biometric SIM)`;
     navigator.clipboard.writeText(summary);
     setCopiedDetails(true);
     setTimeout(() => setCopiedDetails(false), 2000);
@@ -236,8 +240,8 @@ export default function ResultPage({ result, onBackToSearch }: ResultPageProps) 
                 <span className="text-pink-400 font-bold">⚥</span>
                 <span>Gender (নাম অনুযায়ী)</span>
               </span>
-              <span className="font-semibold text-slate-300">
-                বায়োমেট্রিক সিম রেকর্ড (Biometric SIM)
+              <span className={`font-bold ${genderInfo.gender === 'Female' ? 'text-pink-400' : 'text-sky-400'}`}>
+                {genderInfo.label}
               </span>
             </div>
 
